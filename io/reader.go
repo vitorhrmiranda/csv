@@ -1,4 +1,4 @@
-package csv
+package io
 
 import (
 	"encoding/csv"
@@ -12,11 +12,11 @@ import (
 // Extend csv.Reader to add a header map.
 type Reader struct {
 	*csv.Reader
-	header Headers
+	header Header
 }
 
-// Headers is a map of column names to indexes.
-type Headers map[string]int
+// Header is a map of column names to indexes.
+type Header map[string]int
 
 // Readeable is a type that can be converted to a string.
 type Readeable interface {
@@ -43,8 +43,14 @@ func NewReader(r io.Reader) *Reader {
 	return &Reader{Reader: csv.NewReader(r)}
 }
 
-func (r *Reader) Headers() Headers {
-	return r.header
+// Header returns the header of the CSV as Row.
+// The header is a map of column names to indexes.
+func (r *Reader) Header() Row {
+	columns := make(Columns, len(r.header))
+	for name, index := range r.header {
+		columns[index] = name
+	}
+	return Row{Columns: columns, Header: r.header, Comma: string(r.Comma)}
 }
 
 // ParseHeader reads a line of the CSV and creates a header map.
@@ -87,5 +93,5 @@ func (r *Reader) readRow() (Row, error) {
 	if err != nil {
 		return Row{}, err
 	}
-	return Row{Columns: line, Headers: r.header, Comma: string(r.Comma)}, nil
+	return Row{Columns: line, Header: r.header, Comma: string(r.Comma)}, nil
 }

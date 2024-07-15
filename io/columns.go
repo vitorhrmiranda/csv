@@ -15,3 +15,12 @@ func (columns Columns) At(index int) string {
 func (columns Columns) IsEmpty() bool {
 	return len(columns) == 0
 }
+
+// Set sets the value of a column by index.
+func (columns Columns) Set(index int, value string) error {
+	if index < 0 || index >= len(columns) {
+		return ErrIndexOutOfRange
+	}
+	columns[index] = value
+	return nil
+}

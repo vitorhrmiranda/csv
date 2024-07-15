@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/vitorhrmiranda/csv"
-	csvio "github.com/vitorhrmiranda/csv/io"
+	"github.com/vitorhrmiranda/csv/io"
 )
 
 func TestNewReader(t *testing.T) {
@@ -15,11 +15,18 @@ func TestNewReader(t *testing.T) {
 	reader, err := csv.NewReader(fileName, ',')
 	require.NoError(t, err)
 
-	reader.ForEach(func(row csvio.Row) {
-		value, ok := row.Column("a")
-		require.True(t, ok)
-		require.NotEmpty(t, value)
-		t.Log(value)
+	reader.ForEach(func(row io.Row) {
+		t.Run("column", func(t *testing.T) {
+			value, exists := row.Column("a")
+			require.True(t, exists)
+			require.NotEmpty(t, value)
+		})
+		t.Run("set", func(t *testing.T) {
+			row.Set(0, "10")
+			value, exists := row.Column("a")
+			require.True(t, exists)
+			require.Equal(t, "10", value)
+		})
 	})
 }
 

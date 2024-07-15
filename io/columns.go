@@ -1,4 +1,4 @@
-package csv
+package io
 
 type Columns []string
 

@@ -1,4 +1,4 @@
-package csv_test
+package io_test
 
 import (
 	"fmt"

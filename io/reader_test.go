@@ -53,7 +53,7 @@ func TestReader_ParseHeader(t *testing.T) {
 			reader: csv.NewReadeable[string],
 			assert: func(t *testing.T, reader *csv.Reader, err error) {
 				require.NoError(t, err)
-				require.Equal(t, csv.Headers{"a": 0, "b": 1, "c": 2}, reader.Headers())
+				AssertHeaderRow(t, csv.Header{"a": 0, "b": 1, "c": 2}, "a,b,c", reader.Header())
 			},
 		},
 		{
@@ -61,7 +61,7 @@ func TestReader_ParseHeader(t *testing.T) {
 			reader: csv.NewReadeable[string],
 			assert: func(t *testing.T, reader *csv.Reader, err error) {
 				require.NoError(t, err)
-				require.Equal(t, csv.Headers{"a": 0, "b": 1, "c": 2}, reader.Headers())
+				AssertHeaderRow(t, csv.Header{"a": 0, "b": 1, "c": 2}, "a,b,c", reader.Header())
 			},
 		},
 		{
@@ -69,7 +69,7 @@ func TestReader_ParseHeader(t *testing.T) {
 			reader: csv.NewReadeable[string],
 			assert: func(t *testing.T, reader *csv.Reader, err error) {
 				require.NoError(t, err)
-				require.Equal(t, csv.Headers{}, reader.Headers())
+				AssertHeaderRow(t, csv.Header{}, "", reader.Header())
 			},
 		},
 		{
@@ -81,7 +81,7 @@ func TestReader_ParseHeader(t *testing.T) {
 			},
 			assert: func(t *testing.T, reader *csv.Reader, err error) {
 				require.ErrorIs(t, err, csv.ErrReadHeader)
-				require.Equal(t, csv.Headers(nil), reader.Headers())
+				AssertHeaderRow(t, csv.Header(nil), "", reader.Header())
 			},
 		},
 	}
@@ -92,6 +92,12 @@ func TestReader_ParseHeader(t *testing.T) {
 			tcase.assert(t, reader, err)
 		})
 	}
+}
+
+func AssertHeaderRow(t *testing.T, want csv.Header, wantString string, got csv.Row) {
+	t.Helper()
+	require.Equal(t, want, got.Header)
+	require.Equal(t, wantString, got.String())
 }
 
 func TestReader_ForEach(test *testing.T) {

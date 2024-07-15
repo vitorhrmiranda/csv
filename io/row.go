@@ -8,14 +8,14 @@ import (
 // Row is a CSV row.
 type Row struct {
 	Columns
-	Headers
+	Header
 	Comma string
 }
 
 // Column returns the value of a column by name.
 // Need Column values and Headers loaded.
 func (row Row) Column(name string) (string, bool) {
-	index, ok := row.Headers[name]
+	index, ok := row.Header[name]
 	return row.At(index), ok
 }
 

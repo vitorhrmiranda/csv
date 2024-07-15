@@ -18,7 +18,7 @@ func TestRow_Column(t *testing.T) {
 	t.Run("with headers", func(t *testing.T) {
 		r := csv.Row{
 			Columns: []string{"csv"},
-			Headers: csv.Headers{"name": 0},
+			Header:  csv.Header{"name": 0},
 		}
 		value, ok := r.Column("name")
 		require.Equal(t, value, "csv")

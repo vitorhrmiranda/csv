@@ -1,6 +1,7 @@
 package io_test
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -168,4 +169,43 @@ func AssertRows(t *testing.T, oneOf []csv.Columns, got csv.Columns) {
 		}
 	}
 	assert.Fail(t, fmt.Sprintf("unexpected row: %s", got))
+}
+
+func TestReader_MapRows(t *testing.T) {
+	transform := func(r *csv.Row) { r.Columns.Set(0, "T") }
+
+	writer := bytes.NewBuffer(nil)
+	err := csv.NewReadeable("a,b\n1,2\n").MapRows(writer, transform)
+	assert.NoError(t, err)
+	assert.Equal(t, "T,b\nT,2\n", writer.String())
+
+	t.Run("parse header", func(t *testing.T) {
+		writer := bytes.NewBuffer(nil)
+		err := csv.NewReaderWithHeaders("a,b\n1,2\n", ',').MapRows(writer, transform)
+		assert.NoError(t, err)
+		assert.Equal(t, "a,b\nT,2\n", writer.String())
+	})
+
+	t.Run("reader err", func(t *testing.T) {
+		wantErr := fmt.Errorf("error")
+		err := csv.NewReader(&ioWithErr{wantErr}).MapRows(nil, nil)
+		assert.ErrorIs(t, err, wantErr)
+	})
+
+	t.Run("write error", func(t *testing.T) {
+		wantErr := fmt.Errorf("error")
+		err := csv.NewReadeable("a,b\n1,2\n").MapRows(&ioWithErr{wantErr}, transform)
+		assert.ErrorIs(t, err, wantErr)
+		assert.ErrorIs(t, err, csv.ErrMapRows)
+	})
+}
+
+type ioWithErr struct{ error }
+
+func (w *ioWithErr) Write([]byte) (int, error) {
+	return 0, w.error
+}
+
+func (w *ioWithErr) Read([]byte) (int, error) {
+	return 0, w.error
 }

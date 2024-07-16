@@ -80,6 +80,30 @@ func (r *Reader) ForEach(exec func(Row)) error {
 	}
 }
 
+// MapRows reads each row of the CSV and maps a function to it.
+// Flushes the writer after mapping all rows.
+func (r *Reader) MapRows(writer io.Writer, mapper func(*Row)) (err error) {
+	csvMapped := csv.NewWriter(writer)
+	csvMapped.Comma = r.Comma
+
+	if !r.Header().IsEmpty() {
+		_ = csvMapped.Write(r.Header().Columns)
+	}
+
+	if err := r.ForEach(func(row Row) {
+		mapper(&row)
+		_ = csvMapped.Write(row.Columns)
+	}); err != nil {
+		return err
+	}
+
+	csvMapped.Flush()
+	if err := csvMapped.Error(); err != nil {
+		return errors.Join(ErrMapRows, err)
+	}
+	return nil
+}
+
 func (r *Reader) readline() (Columns, error) {
 	line, err := r.Read()
 	if err != nil && !errors.Is(err, io.EOF) {

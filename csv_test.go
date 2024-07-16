@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vitorhrmiranda/csv"
 	"github.com/vitorhrmiranda/csv/io"
@@ -27,6 +28,20 @@ func TestNewReader(t *testing.T) {
 			require.True(t, exists)
 			require.Equal(t, "10", value)
 		})
+	})
+}
+
+func TestNewReader_Error(t *testing.T) {
+	t.Run("read file", func(t *testing.T) {
+		reader, err := csv.NewReader("", ',')
+		assert.Error(t, err)
+		assert.Nil(t, reader)
+	})
+	t.Run("parse header", func(t *testing.T) {
+		fileName := CreateExampleFile(t, []byte(`§a∑""b,c`))
+		reader, err := csv.NewReader(fileName, ',')
+		assert.ErrorIs(t, err, io.ErrReadHeader)
+		assert.Nil(t, reader)
 	})
 }
 

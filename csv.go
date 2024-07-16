@@ -7,17 +7,16 @@ import (
 )
 
 // NewReader creates a new Reader from a file path.
-func NewReader(filePath string, comma rune) (*csv.Reader, error) {
-	reader := new(csv.Reader)
+func NewReader(filePath string, comma rune) (reader *csv.Reader, err error) {
 	file, err := os.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		return reader, err
+		return
 	}
 
 	reader = csv.NewReader(file)
 	reader.Comma = comma
 	if err := reader.ParseHeader(); err != nil {
-		return reader, err
+		return nil, err
 	}
 
 	return reader, nil

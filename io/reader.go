@@ -107,7 +107,7 @@ func (r *Reader) MapRows(writer io.Writer, mapper func(*Row)) (err error) {
 func (r *Reader) readline() (Columns, error) {
 	line, err := r.Read()
 	if err != nil && !errors.Is(err, io.EOF) {
-		return line, err
+		return line, errors.Join(ErrReadLine, err)
 	}
 	return line, nil
 }

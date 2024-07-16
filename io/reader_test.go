@@ -143,7 +143,7 @@ func TestReader_ForEach(test *testing.T) {
 				AssertRows(t, expect, row.Columns)
 			},
 			assert: func(t *testing.T, count int, err error) {
-				require.Error(t, err)
+				require.ErrorIs(t, err, csv.ErrReadLine)
 				require.Equal(t, 1, count)
 			},
 		},

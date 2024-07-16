@@ -16,7 +16,7 @@ func NewReader(filePath string, comma rune) (reader *csv.Reader, err error) {
 	reader = csv.NewReader(file)
 	reader.Comma = comma
 	if err := reader.ParseHeader(); err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return reader, nil

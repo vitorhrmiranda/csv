@@ -104,6 +104,19 @@ func (r *Reader) MapRows(writer io.Writer, mapper func(*Row)) (err error) {
 	return nil
 }
 
+// StreamRows reads each row of the CSV and returns a channel of rows.
+// After reading all rows, it closes the channel and writes any error to another channel.
+func (r *Reader) StreamRows() (<-chan Row, <-chan error) {
+	rows, errs := make(chan Row), make(chan error, 1)
+	go func() {
+		defer close(rows)
+		defer close(errs)
+
+		errs <- r.ForEach(func(row Row) { rows <- row })
+	}()
+	return rows, errs
+}
+
 func (r *Reader) readline() (Columns, error) {
 	line, err := r.Read()
 	if err != nil && !errors.Is(err, io.EOF) {

@@ -200,6 +200,33 @@ func TestReader_MapRows(t *testing.T) {
 	})
 }
 
+func TestReader_StreamRows(t *testing.T) {
+	t.Run("read all", func(t *testing.T) {
+		reader := csv.NewReadeable("a,1\nb,2\nc,3\nd,4")
+		processed := bytes.NewBuffer(nil)
+		rows, errs := reader.StreamRows()
+		for row := range rows {
+			fmt.Fprintln(processed, row)
+		}
+		err, ok := <-errs
+		assert.True(t, ok)
+		assert.NoError(t, err)
+		assert.Equal(t, "a,1\nb,2\nc,3\nd,4\n", processed.String())
+	})
+	t.Run("read with err", func(t *testing.T) {
+		reader := csv.NewReadeable("a,1\nb,2\nc3\nd,4")
+		processed := bytes.NewBuffer(nil)
+		rows, errs := reader.StreamRows()
+		for row := range rows {
+			fmt.Fprintln(processed, row)
+		}
+		err, ok := <-errs
+		assert.True(t, ok)
+		assert.ErrorIs(t, err, csv.ErrReadLine)
+		assert.Equal(t, "a,1\nb,2\n", processed.String())
+	})
+}
+
 type ioWithErr struct{ error }
 
 func (w *ioWithErr) Write([]byte) (int, error) {
